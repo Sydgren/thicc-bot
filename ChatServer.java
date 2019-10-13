@@ -4,7 +4,7 @@ import java.io.InputStreamReader;
 public class ChatServer {
 
     public static void main(String[] args) {
-        Messenger.startAcceptingConnections();
+        Messenger.startAcceptingConnections(5);
 
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 

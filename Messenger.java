@@ -3,6 +3,7 @@ import java.net.Socket;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public class Messenger {
+    
     private static boolean running = false;
 
     public static void startAcceptingConnections(int poolSize) {
