@@ -1,9 +1,14 @@
+package messaging;
+
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-public class ClientConnection extends Thread {
+public class ClientConnection implements Runnable {
 
     private Socket socket;
 
@@ -11,25 +16,20 @@ public class ClientConnection extends Thread {
 
     private DataOutputStream outputStream;
 
-    private List<String> stopCommands = new ArrayList<String>(
-        Arrays.asList(
-            "quit", 
-            "exit", 
-            "disconnect"));
+    private boolean isLoggedIn = false;
 
-    public ClientConnection(Socket socket) {
+    public ClientConnection(Socket socket) throws IOException {
         this.socket = socket;
         this.inputStream = new DataInputStream(this.socket.getInputStream());
         this.outputStream = new DataOutputStream(this.socket.getOutputStream());
-
     }
 
     public void run() {
-        while(this.isNotLoggedIn()) {
+        while (! this.isLoggedIn()) {
             String input = this.inputStream.readUTF();
-            boolean success = LoginHandler.attempt(input);
+            boolean success = Messenger.login(input);
 
-            this.sendLoginResponse(input);
+            this.sendLoginResponse(success, input);
 
             if (success) {
                 break;
@@ -38,14 +38,22 @@ public class ClientConnection extends Thread {
 
         while(this.isClientAlive()) {
             String input = this.inputStream.readUTF();
-            String[] command = message.split(" ", 2);
+            String[] command = input.split(" ", 2);
 
             this.handleCommand(command[0], command[1]);
         }
     }
 
     private void handleCommand(String type, String params) {
-        //
+        switch (type) {
+            case "JOIN":
+
+                break;
+        }
+    }
+
+    private boolean isLoggedIn() {
+        return this.isLoggedIn;
     }
 
     private boolean isClientAlive() {
@@ -53,11 +61,21 @@ public class ClientConnection extends Thread {
             && this.socket.isConnected();
     }
 
-    private void disconnect() {
+    private void disconnect() throws IOException {
         this.socket.close();
     }
 
+    private boolean hasReceivedKeepAlive() {
+        return true;
+    }
+
+    private void sendLoginResponse(boolean success, String username) {
+        String command = success ? "J_OK" : "J_ER";
+
+        this.outputStream.writeUTF(command + " " + username);
+    }
+
     public void sendMessageToClient(String sender, String message) {
-        this.outputStream.
+        
     }
 }
